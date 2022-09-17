@@ -33,7 +33,6 @@ def train(
     log_file,
     scheduler,
     class_names,
-    args,
     print_every=25,
 ):
     model.train()
@@ -61,7 +60,7 @@ def train(
         loss = criterion(predictions, labels)
 
         loss.backward()
-        if args.scheduler == "clr":
+        if scheduler == "clr":
             scheduler.step()
 
         optimizer.step()

@@ -1,62 +1,26 @@
-import json
 import torch
 import torch.nn as nn
 
 
 class CharacterLevelCNN(nn.Module):
-    def __init__(self, args, number_of_classes):
-        super(CharacterLevelCNN, self).__init__()
+    def __init__(self, number_of_classes, num_chars: int, max_length: int, dropout_input=0.2):
+        super().__init__()
 
         # define conv layers
-
-        self.dropout_input = nn.Dropout2d(args.dropout_input)
-
-        self.conv1 = nn.Sequential(
-            nn.Conv1d(
-                args.number_of_characters + len(args.extra_characters),
-                256,
-                kernel_size=7,
-                padding=0,
-            ),
-            nn.ReLU(),
-            nn.MaxPool1d(3),
-        )
-
-        self.conv2 = nn.Sequential(
-            nn.Conv1d(256, 256, kernel_size=7, padding=0), nn.ReLU(), nn.MaxPool1d(3)
-        )
-
-        self.conv3 = nn.Sequential(
-            nn.Conv1d(256, 256, kernel_size=3, padding=0), nn.ReLU()
-        )
-
-        self.conv4 = nn.Sequential(
-            nn.Conv1d(256, 256, kernel_size=3, padding=0), nn.ReLU()
-        )
-
-        self.conv5 = nn.Sequential(
-            nn.Conv1d(256, 256, kernel_size=3, padding=0), nn.ReLU()
-        )
-
-        self.conv6 = nn.Sequential(
-            nn.Conv1d(256, 256, kernel_size=3, padding=0), nn.ReLU(), nn.MaxPool1d(3)
-        )
+        self.dropout_input = nn.Dropout2d(dropout_input)
+        self.conv1 = nn.Sequential(nn.Conv1d(num_chars, 256, kernel_size=7, padding=0, ), nn.ReLU(), nn.MaxPool1d(3))
+        self.conv2 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=7, padding=0), nn.ReLU(), nn.MaxPool1d(3))
+        self.conv3 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=3, padding=0), nn.ReLU())
+        self.conv4 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=3, padding=0), nn.ReLU())
+        self.conv5 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=3, padding=0), nn.ReLU())
+        self.conv6 = nn.Sequential(nn.Conv1d(256, 256, kernel_size=3, padding=0), nn.ReLU(), nn.MaxPool1d(3))
 
         # compute the  output shape after forwarding an input to the conv layers
-
-        input_shape = (
-            128,
-            args.max_length,
-            args.number_of_characters + len(args.extra_characters),
-        )
+        input_shape = (128, max_length, num_chars,)
         self.output_dimension = self._get_conv_output(input_shape)
 
         # define linear layers
-
-        self.fc1 = nn.Sequential(
-            nn.Linear(self.output_dimension, 1024), nn.ReLU(), nn.Dropout(0.5)
-        )
-
+        self.fc1 = nn.Sequential(nn.Linear(self.output_dimension, 1024), nn.ReLU(), nn.Dropout(0.5))
         self.fc2 = nn.Sequential(nn.Linear(1024, 1024), nn.ReLU(), nn.Dropout(0.5))
 
         self.fc3 = nn.Linear(1024, number_of_classes)

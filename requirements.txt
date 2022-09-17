@@ -1,0 +1,7 @@
+sklearn
+torch
+tensorflow
+tensorboard
+pandas
+jupyter
+tensorboardX

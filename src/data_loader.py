@@ -95,18 +95,32 @@ def load_data(args):
     return texts, labels, number_of_classes, sample_weights
 
 
+def load_from_csv(df: pd.DataFrame):
+    texts = df.text.tolist()
+    labels = [y//4 for y in  df.target.tolist()]
+
+    number_of_classes = len(set(labels))
+
+    print(
+        f"data loaded successfully with {len(texts)} rows and {number_of_classes} labels"
+    )
+    print("Distribution of the classes", Counter(labels))
+
+    sample_weights = get_sample_weights(labels)
+
+    return texts, labels, number_of_classes, sample_weights
+
+
 class MyDataset(Dataset):
-    def __init__(self, texts, labels, args):
+    def __init__(self, texts, labels, vocabulary:str, max_length = 150):
         self.texts = texts
         self.labels = labels
         self.length = len(self.texts)
 
-        self.vocabulary = args.alphabet + args.extra_characters
-        self.number_of_characters = args.number_of_characters + len(
-            args.extra_characters
-        )
-        self.max_length = args.max_length
-        self.preprocessing_steps = args.steps
+        self.vocabulary = vocabulary
+        self.number_of_characters = len(self.vocabulary)
+        self.max_length = max_length
+        # self.preprocessing_steps = args.steps
         self.identity_mat = np.identity(self.number_of_characters)
 
     def __len__(self):
